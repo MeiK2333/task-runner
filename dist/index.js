@@ -71,6 +71,7 @@ class Task {
                 yield runner;
             }
             catch (e) {
+                console.error(e);
                 status = TaskStatus.FAILURE;
             }
             return status;
@@ -78,8 +79,8 @@ class Task {
     }
 }
 exports.Task = Task;
-function T(func) {
-    const task = new Task(func);
+function T(func, config) {
+    const task = new Task(func, config);
     return task;
 }
 exports.T = T;

@@ -26,7 +26,7 @@ export declare class Task<T> {
     finally(onfinally: (() => void | Promise<void>) | undefined | null): this;
     run(): Promise<TaskStatus>;
 }
-export declare function T<T>(func: (() => Promise<T>)): Task<T>;
+export declare function T<T>(func: (() => Promise<T>), config?: TaskConfig): Task<T>;
 export interface TaskRunnerConfig {
     maxRunning?: number;
 }

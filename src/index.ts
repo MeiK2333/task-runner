@@ -97,8 +97,8 @@ export class Task<T> {
   }
 }
 
-export function T<T>(func: (() => Promise<T>)) {
-  const task = new Task(func);
+export function T<T>(func: (() => Promise<T>), config?: TaskConfig) {
+  const task = new Task(func, config);
   return task;
 }
 

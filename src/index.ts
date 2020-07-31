@@ -90,6 +90,7 @@ export class Task<T> {
       }
       await runner;
     } catch (e) {
+      console.error(e);
       status = TaskStatus.FAILURE;
     }
     return status;

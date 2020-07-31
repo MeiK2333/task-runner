@@ -1,0 +1,37 @@
+{
+  "name": "task-runner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MeiK2333/task-runner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MeiK2333/task-runner/issues"
+  },
+  "homepage": "https://github.com/MeiK2333/task-runner#readme",
+  "dependencies": {
+    "fastpriorityqueue": "^0.6.3",
+    "moment": "^2.27.0",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.7",
+    "@types/node": "^14.0.27",
+    "jest": "^26.1.0",
+    "ts-jest": "^26.1.4",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.7"
+  }
+}

@@ -21,8 +21,8 @@ export declare class Task<T> {
     private finallyFunc;
     private funcTypes;
     constructor(func: (() => Promise<T>), config?: TaskConfig);
-    then(onfulfilled?: ((value: T) => Promise<T>) | undefined | null, onrejected?: ((reason: any) => never | Promise<never>) | undefined | null): this;
-    catch(onrejected?: ((reason: any) => never | Promise<never>) | undefined | null): this;
+    then(onfulfilled?: ((value: T) => Promise<any> | any), onrejected?: ((reason: any) => any | Promise<any>) | undefined | null): this;
+    catch(onrejected?: ((reason: any) => any | Promise<any>) | undefined | null): this;
     finally(onfinally: (() => void | Promise<void>) | undefined | null): this;
     run(): Promise<TaskStatus>;
 }
@@ -32,7 +32,6 @@ export interface TaskRunnerConfig {
 }
 export declare class TaskRunner<T> extends EventEmitter {
     private config;
-    private maxPriority;
     private pending;
     private running;
     private success;

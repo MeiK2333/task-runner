@@ -29,7 +29,7 @@ class TaskQueue {
     push(task) {
         if (this.count++ % this.trimCount === 0)
             this.queue.trim();
-        this.max_priority--;
+        this.max_priority++;
         task.config.priority = this.max_priority;
         this.queue.add(task);
     }

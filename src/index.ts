@@ -32,9 +32,9 @@ export class Task<T> {
 
   private thenFunc: Array<{
     onfulfilled: ((value: T) => Promise<T>) | undefined | null,
-    onrejected?: (reason: any) => never | Promise<never>
+    onrejected?: (reason: any) => any | Promise<any>
   }>
-  private catchFunc: Array<((reason: any) => never | Promise<never>) | undefined | null>
+  private catchFunc: Array<((reason: any) => any | Promise<any>) | undefined | null>
   private finallyFunc: Array<(() => void | Promise<void>) | undefined | null>
   private funcTypes: Array<FuncType>
 
@@ -43,7 +43,7 @@ export class Task<T> {
     __id__++;
 
     this.func = func;
-    this.config = { ...{ retry: 0 }, ...config };
+    this.config = { ...{ retry: 0, priority: this.__id__ }, ...config };
     this.status = TaskStatus.PENDING;
 
     this.thenFunc = [];
@@ -51,7 +51,7 @@ export class Task<T> {
     this.finallyFunc = [];
     this.funcTypes = [];
   }
-  then(onfulfilled?: ((value: T) => Promise<T>) | undefined | null, onrejected?: ((reason: any) => never | Promise<never>) | undefined | null) {
+  then(onfulfilled?: ((value: T) => Promise<any> | any), onrejected?: ((reason: any) => any | Promise<any>) | undefined | null) {
     this.thenFunc.push({
       onfulfilled,
       onrejected
@@ -59,7 +59,7 @@ export class Task<T> {
     this.funcTypes.push(FuncType.THEN);
     return this;
   }
-  catch(onrejected?: ((reason: any) => never | Promise<never>) | undefined | null) {
+  catch(onrejected?: ((reason: any) => any | Promise<any>) | undefined | null) {
     this.catchFunc.push(onrejected);
     this.funcTypes.push(FuncType.CATCH);
     return this;
@@ -74,17 +74,18 @@ export class Task<T> {
     let status = TaskStatus.SUCCESS;
     try {
       let runner = this.func();
+      let tl = 0, cl = 0, fl = 0;
       for (const type of this.funcTypes) {
         switch (type) {
           case FuncType.THEN:
-            const thenF = this.thenFunc.shift();
+            const thenF = this.thenFunc[tl++];
             runner = runner.then(thenF.onfulfilled, thenF.onrejected);
             break;
           case FuncType.CATCH:
-            runner = runner.catch(this.catchFunc.shift());
+            runner = runner.catch(this.catchFunc[cl++]);
             break;
           case FuncType.FINALLY:
-            runner = runner.finally(this.finallyFunc.shift());
+            runner = runner.finally(this.finallyFunc[fl++]);
             break;
         }
       }
@@ -108,7 +109,6 @@ export interface TaskRunnerConfig {
 
 export class TaskRunner<T> extends EventEmitter {
   private config: TaskRunnerConfig
-  private maxPriority: number
 
   private pending: TaskQueue
   private running: TaskQueue
@@ -128,17 +128,10 @@ export class TaskRunner<T> extends EventEmitter {
       },
       ...config
     }
-    this.maxPriority = 0;
 
     this.on('taskChange', this.onTaskChange);
   }
   add(task: Task<any>) {
-    if (!task.config.priority) {
-      task.config.priority = this.maxPriority;
-      this.maxPriority++;
-    } else {
-      this.maxPriority = Math.max(task.config.priority + 1, this.maxPriority);
-    }
     this.pending.add(task);
   }
   addList(tasks: Iterable<any>) {
@@ -187,7 +180,7 @@ export class TaskRunner<T> extends EventEmitter {
           this.failure++;
         }
         this.emit('taskChange');
-      })
+      });
 
       runningCount++;
       pendingCount--;

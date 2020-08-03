@@ -24,7 +24,7 @@ class Task {
         this.__id__ = __id__;
         __id__++;
         this.func = func;
-        this.config = Object.assign({ retry: 0 }, config);
+        this.config = Object.assign({ retry: 0, priority: this.__id__ }, config);
         this.status = TaskStatus.PENDING;
         this.thenFunc = [];
         this.catchFunc = [];
@@ -54,17 +54,18 @@ class Task {
             let status = TaskStatus.SUCCESS;
             try {
                 let runner = this.func();
+                let tl = 0, cl = 0, fl = 0;
                 for (const type of this.funcTypes) {
                     switch (type) {
                         case FuncType.THEN:
-                            const thenF = this.thenFunc.shift();
+                            const thenF = this.thenFunc[tl++];
                             runner = runner.then(thenF.onfulfilled, thenF.onrejected);
                             break;
                         case FuncType.CATCH:
-                            runner = runner.catch(this.catchFunc.shift());
+                            runner = runner.catch(this.catchFunc[cl++]);
                             break;
                         case FuncType.FINALLY:
-                            runner = runner.finally(this.finallyFunc.shift());
+                            runner = runner.finally(this.finallyFunc[fl++]);
                             break;
                     }
                 }
@@ -94,17 +95,9 @@ class TaskRunner extends events_1.EventEmitter {
         this.config = Object.assign({
             maxRunning: 0
         }, config);
-        this.maxPriority = 0;
         this.on('taskChange', this.onTaskChange);
     }
     add(task) {
-        if (!task.config.priority) {
-            task.config.priority = this.maxPriority;
-            this.maxPriority++;
-        }
-        else {
-            this.maxPriority = Math.max(task.config.priority + 1, this.maxPriority);
-        }
         this.pending.add(task);
     }
     addList(tasks) {

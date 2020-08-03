@@ -24,42 +24,42 @@ export class TaskQueue {
     if (this.count++ % this.trimCount === 0) this.queue.trim()
     if (task.config.priority !== null) {
       this.max_priority = Math.max(task.config.priority + 1, this.max_priority);
-      this.queue.add(task)
+      this.queue.add(task);
     } else {
-      this.push(task)
+      this.push(task);
     }
 
   }
 
   private push(task: Task<any>) {
-    if (this.count++ % this.trimCount === 0) this.queue.trim()
-    this.max_priority--
-    task.config.priority = this.max_priority
-    this.queue.add(task)
+    if (this.count++ % this.trimCount === 0) this.queue.trim();
+    this.max_priority++;
+    task.config.priority = this.max_priority;
+    this.queue.add(task);
   }
 
   delete(task: Task<any>): Task<any> {
-    if (this.count++ % this.trimCount === 0) this.queue.trim()
+    if (this.count++ % this.trimCount === 0) this.queue.trim();
     if (this.queue.remove(task)) {
-      return task
+      return task;
     }
-    return null
+    return null;
   }
 
   pop(): Task<any> {
-    if (this.count++ % this.trimCount === 0) this.queue.trim()
-    const task = this.queue.poll()
+    if (this.count++ % this.trimCount === 0) this.queue.trim();
+    const task = this.queue.poll();
     if (task) {
-      return task
+      return task;
     }
-    return null
+    return null;
   }
 
   empty(): boolean {
-    return this.queue.isEmpty()
+    return this.queue.isEmpty();
   }
 
   size(): number {
-    return this.queue.size
+    return this.queue.size;
   }
 }

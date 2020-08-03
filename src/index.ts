@@ -2,6 +2,7 @@ export * from './logger';
 import { TaskQueue } from './queue';
 
 import { EventEmitter } from 'events';
+import { logger } from './logger';
 
 export enum TaskStatus {
   PENDING = 0,
@@ -13,6 +14,7 @@ export enum TaskStatus {
 export interface TaskConfig {
   priority?: number
   retry?: number
+  errorLog?: boolean
 }
 
 enum FuncType {
@@ -43,7 +45,7 @@ export class Task<T> {
     __id__++;
 
     this.func = func;
-    this.config = { ...{ retry: 0, priority: this.__id__ }, ...config };
+    this.config = { ...{ retry: 0, priority: this.__id__, errorLog: false }, ...config };
     this.status = TaskStatus.PENDING;
 
     this.thenFunc = [];
@@ -91,7 +93,9 @@ export class Task<T> {
       }
       await runner;
     } catch (e) {
-      console.error(e);
+      if (this.config.errorLog) {
+        console.error(e);
+      }
       status = TaskStatus.FAILURE;
     }
     return status;
@@ -176,6 +180,7 @@ export class TaskRunner<T> extends EventEmitter {
         } else if (status == TaskStatus.FAILURE && task.config.retry > 0) {
           task.config.retry--;
           this.add(task);
+          logger.debug(`task ${task.__id__} retry ${task.config.retry + 1} --> ${task.config.retry}`);
         } else {
           this.failure++;
         }

@@ -1,4 +1,8 @@
-import { T, R } from '../src'
+import { T, R, TaskRunner } from '../src'
+
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 test('then', async () => {
   await R([
@@ -9,9 +13,6 @@ test('then', async () => {
 });
 
 test('limit', async () => {
-  async function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
   const start = new Date().getTime();
   const funcs = [];
   for (let i = 0; i < 5; i++) {
@@ -51,3 +52,21 @@ test('retry', async () => {
   }, { retry: 2 })]);
   expect(count).toBe(3);
 });
+
+test('mul', async () => {
+  const taskRunner = new TaskRunner({ maxRunning: 2 });
+  let count = 0;
+  for (let i = 0; i < 5; i++) {
+    taskRunner.add(T(async () => {
+      const tr = new TaskRunner({ maxRunning: 2 });
+      for (let j = 0; j < 5; j++) {
+        tr.add(T(async () => {
+          count++;
+        }))
+      }
+      await tr.all();
+    }))
+  }
+  await taskRunner.all();
+  expect(count).toBe(25);
+})

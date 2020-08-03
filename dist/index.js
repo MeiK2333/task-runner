@@ -5,6 +5,7 @@ const tslib_1 = require("tslib");
 tslib_1.__exportStar(require("./logger"), exports);
 const queue_1 = require("./queue");
 const events_1 = require("events");
+const logger_1 = require("./logger");
 var TaskStatus;
 (function (TaskStatus) {
     TaskStatus[TaskStatus["PENDING"] = 0] = "PENDING";
@@ -24,7 +25,7 @@ class Task {
         this.__id__ = __id__;
         __id__++;
         this.func = func;
-        this.config = Object.assign({ retry: 0, priority: this.__id__ }, config);
+        this.config = Object.assign({ retry: 0, priority: this.__id__, errorLog: false }, config);
         this.status = TaskStatus.PENDING;
         this.thenFunc = [];
         this.catchFunc = [];
@@ -72,7 +73,9 @@ class Task {
                 yield runner;
             }
             catch (e) {
-                console.error(e);
+                if (this.config.errorLog) {
+                    console.error(e);
+                }
                 status = TaskStatus.FAILURE;
             }
             return status;
@@ -149,6 +152,7 @@ class TaskRunner extends events_1.EventEmitter {
                     else if (status == TaskStatus.FAILURE && task.config.retry > 0) {
                         task.config.retry--;
                         this.add(task);
+                        logger_1.logger.debug(`task ${task.__id__} retry ${task.config.retry + 1} --> ${task.config.retry}`);
                     }
                     else {
                         this.failure++;

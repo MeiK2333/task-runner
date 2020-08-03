@@ -10,6 +10,7 @@ export declare enum TaskStatus {
 export interface TaskConfig {
     priority?: number;
     retry?: number;
+    errorLog?: boolean;
 }
 export declare class Task<T> {
     __id__: number;
